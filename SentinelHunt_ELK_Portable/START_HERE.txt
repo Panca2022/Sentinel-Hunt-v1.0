@@ -1,0 +1,24 @@
+START HERE - SentinelHunt portable ELK
+
+Extract this ZIP inside the WSL Ubuntu Linux home directory and enter the
+SentinelHunt_ELK_Portable directory in the Ubuntu terminal.
+Keep the original clean ZIP for sharing; runtime/ is private deployment state.
+
+First run only:
+python3 scripts/manage.py check
+
+If the kernel limit check fails, follow README.md, then repeat check.
+After preflight passes:
+python3 scripts/manage.py start
+python3 scripts/manage.py smoke
+
+Kibana: http://localhost:15601
+Username: elastic
+Show the generated password privately:
+python3 scripts/manage.py password elastic
+
+Existing Elasticsearch on 9200 is preserved. New secure Elasticsearch is on 19200.
+Agree AGENT_INTEGRATION.md before switching MCP connections.
+Use the teammate's WSL machine for side-by-side deployment: two concurrent ELK
+stacks can exceed the original 5.8 GiB Ubuntu VM's memory.
+Read README.md and VALIDATION.md before deployment.

@@ -1,0 +1,164 @@
+{
+  "frozen_at_utc": "2026-10-25T12:04:51+00:00",
+  "code": {
+    "project": {
+      "agent1/eval_v3.py": "b4df2473f1756ac7ed176e55e709bc17336c13f9a75071dc7b29292cc2bd908e",
+      "agent1/run_source.py": "9deeec074c73cf82e62b889b0458a23fee9ea7934ba8141541f6be1df15df2cf",
+      "agent1/schema_agent.py": "25dd458d8f3f277933f859a1fd12c5014200f33eabab8ef00a080b65a73fb7d5",
+      "agent1/stages_v4.py": "344057cee5e546a5630c05377fd9d6b1c46380ee21a84a3841a5f10c19368feb",
+      "agent1/vocabulary.json": "a02e39e5887d881d84093bf7225fd9ad10a7f799d718185dfdf57df24a0e6d9b",
+      "agent1/example_library.json": "515863f5402c68424a9200665c4bea91a521601f45722bd5823ba697c5b8ef78",
+      "agent2/hunt_agent.py": "59c39d91e3bd578dfc5b8c4f01a5d01c2f017f9a97640233ec3006d8ac1aa0c8",
+      "mcp_server/demo_flow.py": "04763ca95de6a77f20a039c8f770806dcab4b1bc4a9dd9c03175926d55b5860f",
+      "mcp_server/ingest_client.py": "6e0af9d66efe4d2cff2f8a3f92937649fd7007b88c3e951eb6ed9e5cde549a9b",
+      "mcp_server/server.py": "2f3e153d88e2421fe685f51632a51dc0f690ba05d79b16051b3c8bbf8022fe4e",
+      "mcp_server/requirements.txt": "22e0a3eb206339a4112945bafe1fb77688534a98816c3a4dd1c7e6ebbceb4190",
+      "demo/app.py": "8c18783ba245b5eccc40f68289a1127a25d66c1e2c67fc363d1f9ebc61fcab1a",
+      "demo/requirements.txt": "c11d8117f96630e029f79cecf008555505260b2e77483aab738c10815bba2d16",
+      "experiments/compare_hunt_vs_reference.py": "b92a928f11c355d4336d93fbabda181dae50b52465cd786ca8bde2464d34ec60",
+      "experiments/fix_comparison.py": "a0ad708f709abe6118f3ce3ef06af5290b2b265ac6303df7eacad02639ad8581",
+      "experiments/regression_tc1.py": "87d3e5933c614859142866f9090ed7e2a42e84c47ff404d6049fa1c193784c17",
+      "experiments/replay_time_claims.py": "cea3cab2940f5b433062bc299ba51232250a001a3aef399642857a18cef29510",
+      "experiments/run_twice.py": "ee38967862f3b5ea2ed861a625dbdcc1a00f01d7cc016cfc4dc725b9f3f24de4",
+      "experiments/side_by_side.py": "678987fd8516e7fd399b52ad1e52e8d8ae31ed3ba2ed5f80c3fc6ebd29f59d96",
+      "experiments/side_by_side_image.py": "c2aa3f7f62621dec5043bf2d0fa3cc0a9fca9f6aff3d54efbf1a2c338dcc1420",
+      "experiments/verify_tc1.py": "76ecb0ab8f699b40d72940dea73b10949d6b221afe745f6d218f830f5242b0d1",
+      "scripts/export_run_evidence.py": "519853f0ed31433c479df4f721f9a2ddf053044d842cb33575261daa01d85b5a",
+      "scripts/freeze_versions.py": "a4d40014890fb0656a3a0652b2b5a5243bcb31454e0e852173772939bd0af6f9",
+      "scripts/remove_feed.py": "a443c5d86701572ac499f43e1c4303cabdf6dc46e93576dafe450e79a844e5aa",
+      "scripts/retire_templates.py": "09ffd6a042fdd55ec958e6e7c206ed3aedeaaeaa871cb7170b38b036582df0e5",
+      "scripts/verify_demo_run.py": "bf6a95bd86b759426705ba19cb28ff8424f899f234f7e024888f39f2a52db1b1"
+    },
+    "kit": {
+      "compose.yaml": "07555340c682bf2bd80f5a7abfec973d86b5d502495e84a9d5db77a12ab23922",
+      "scripts/manage.py": "6fc1a12ff2b071f9a6aa3ed4303881a98f4df24b47d38b175ef91e674687a7e1",
+      "scripts/ship.py": "95d2eb8892d58a310db071e84eb17bcfbd5ae57e354f73357000ff84631a61f1",
+      "config/pipeline/raw.conf": "b2e1a4a778660d3153219f680f9bd28aa97837e3b0dac075e95927a9f13dd66c",
+      "config/hunt-mapping.json": "762cf0e10d21c370032c83aa386a4d2ee12d2e068da393a5fd1a4c26a028744b",
+      "config/raw-mapping.json": "c93c5b56374b220a4603f75a5721b2562b35ad29a8c744e643905cd22900a965",
+      "config/logstash.yml": "4e3e1b910346d70c0c64493c512ce31c25022c0c62deedbb935775b96b1c2095"
+    }
+  },
+  "model": {
+    "name": "qwen3:14b",
+    "digest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
+    "size_bytes": 9276198565,
+    "parameter_size": "14.8B",
+    "quantization": "Q4_K_M",
+    "ollama_version": "ollama version is 0.40.6",
+    "agent2_settings": {
+      "temperature": "0",
+      "seed": "42",
+      "num_ctx": 8192,
+      "think": false
+    },
+    "agent1_settings": {
+      "model": "qwen3:14b",
+      "seed": 42,
+      "temperatures": "0 for the first candidate, 0.7 for the others",
+      "parse_threshold": 0.95
+    }
+  },
+  "platform": {
+    "elasticsearch": "8.19.23",
+    "elasticsearch_build": "6940e499f8a38841809b8e295a20c6421c95d9e4",
+    "docker_images": [
+      "docker.elastic.co/kibana/kibana:8.19.23",
+      "docker.elastic.co/logstash/logstash:8.19.23",
+      "docker.elastic.co/elasticsearch/elasticsearch:8.19.23"
+    ],
+    "python": "3.12.3",
+    "os": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "packages": [
+      "anyio==4.15.1",
+      "mcp==1.30.0",
+      "pydantic==2.14.1",
+      "streamlit==1.40.2"
+    ]
+  },
+  "agent1_templates": {
+    "logs-v3-mixed-pilot-layout1": {
+      "feed_name": "v3-mixed-pilot",
+      "updated": "2026-10-24T08:59:03+00:00",
+      "pipeline_sha256": "a90483489b912a1c8ad1ecefeb9312b06d322a4c7f52121dbac1e8ad21f96dc5"
+    },
+    "logs-v3-mixed-pilot-layout2": {
+      "feed_name": "v3-mixed-pilot",
+      "updated": "2026-10-24T08:59:15+00:00",
+      "pipeline_sha256": "d80f44ecf2f610af5b475c92048b3f886037e9ffe727cfd89353e748134eeca4"
+    },
+    "logs-v3-mixed-pilot-layout3": {
+      "feed_name": "v3-mixed-pilot",
+      "updated": "2026-10-24T09:00:07+00:00",
+      "pipeline_sha256": "3330161760eb689dccfd7ee89473d57f822b2011128e6a5cea294752e4051a57"
+    },
+    "logs-bastion-02-auth-layout1": {
+      "feed_name": "bastion-02-auth",
+      "updated": "2026-10-25T12:02:58+00:00",
+      "pipeline_sha256": "57dc7ced3d77011926859e4344fb33ae7deb5e5fbecad83c6ec9547876b52317"
+    }
+  },
+  "feed_routers": {
+    "feed-bastion-02-auth": [
+      "logs-bastion-02-auth-layout1"
+    ],
+    "feed-v3-mixed-pilot": [
+      "logs-v3-mixed-pilot-layout1",
+      "logs-v3-mixed-pilot-layout2",
+      "logs-v3-mixed-pilot-layout3"
+    ]
+  },
+  "indices": {
+    "sentinelhunt-raw-v1": {
+      "total": 590,
+      "per_feed": {
+        "v3-mixed-pilot": 545,
+        "bastion-02-auth": 36,
+        "local-syslog": 4,
+        "smoke-auth": 3,
+        "smoke-web": 2
+      }
+    },
+    "sentinelhunt-hunt-v1": {
+      "total": 581,
+      "per_feed": {
+        "v3-mixed-pilot": 545,
+        "bastion-02-auth": 36
+      }
+    },
+    "v3_fingerprint": {
+      "records": 545,
+      "ids_sha256": "a70b14e38a69e18ca292400504a31ead8930a8bf817367d96ed59fd3fd6f79bc",
+      "content_sha256": "6fd3ef8ebcaef8ccb39e28544af233358128b06ff41b96d008bd47e857aed540"
+    }
+  },
+  "result_folders": {
+    "regression_tc1_20261024-185158": {},
+    "replay_time_claims_20261024-192313": {},
+    "run_twice_20261024-134108": {
+      "comparison_sha256": "9d787e680f816167f6fa3a0d9526b5bbe6d7d6e3c67c769e0606621d594cdbf0"
+    },
+    "run_twice_20261024-142708": {},
+    "run_twice_20261024-144113": {
+      "comparison_sha256": "24446fe284f887dd1872e1cec7e7a096ec5be1253d2291f3124df14dd692eb79"
+    },
+    "run_twice_20261024-144428": {
+      "comparison_sha256": "444b9be052eaf5dcbb6a69e134c0334116b92314938a7848362ce802fc1ab933"
+    },
+    "run_twice_20261024-151948": {
+      "comparison_sha256": "05652f7c8914f470c40da0f8c1b9cf3a4d95ecceb5a6d3ea8623b92d7db4314c"
+    },
+    "run_twice_20261024-153103": {
+      "comparison_sha256": "66ce8558e0a83e9c1687ed45754f89e46af7a9aaf51418a9ff238403efbd168e"
+    },
+    "run_twice_20261024-155852": {
+      "comparison_sha256": "ffa2f4944aa2c3878a243803f6a55b35d18e5e272898f5573bf441a484c1d1bd"
+    },
+    "run_twice_20261024-160908": {
+      "comparison_sha256": "779d8a0a1468617c118d4132a8d17adb9d7a64c618bb618d78098aa85796c9dc"
+    },
+    "run_twice_20261024-161924": {
+      "comparison_sha256": "dcc4c8993b7f30c78aacdabdee7c621523c7e23e644ad203bee4621b2339cf80"
+    }
+  }
+}

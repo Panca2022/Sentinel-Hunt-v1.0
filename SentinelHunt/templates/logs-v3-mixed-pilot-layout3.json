@@ -1,0 +1,378 @@
+{
+  "name": "logs-v3-mixed-pilot-layout3",
+  "registry": {
+    "name": "logs-v3-mixed-pilot-layout3",
+    "feed_name": "v3-mixed-pilot",
+    "layout_shape": "9-9-9a9:9:9.9+9:9 a_9",
+    "version": "4",
+    "model": "qwen3:14b",
+    "updated": "2026-10-24T09:00:07+00:00",
+    "processors_json": "[{\"set\": {\"field\": \"message\", \"copy_from\": \"raw_line\", \"if\": \"ctx.message == null && ctx.raw_line != null\"}}, {\"set\": {\"field\": \"event.original\", \"copy_from\": \"message\", \"if\": \"ctx.event?.original == null\"}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"%{TIMESTAMP_ISO8601:timestamp} %{DATA:host.hostname} %{DATA:process.name}\\\\[%{POSINT:process.pid}\\\\]: %{GREEDYDATA:log_message}\"]}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"^%{TIMESTAMP_ISO8601:timestamp}\"]}}, {\"date\": {\"field\": \"timestamp\", \"target_field\": \"@timestamp\", \"formats\": [\"yyyy-MM-dd HH:mm:ss,SSS\", \"yyyy-MM-dd HH:mm:ss.SSS\", \"yyyy-MM-dd HH:mm:ss\", \"ISO8601\"]}}, {\"grok\": {\"field\": \"log_message\", \"patterns\": [\"^pam_unix\\\\(sudo:session\\\\):\\\\s+session\\\\s+opened\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.target.name}\\\\(uid=\\\\d+\\\\)\\\\s+by\\\\s+%{NOTSPACE:user.name}\\\\(uid=\\\\d+\\\\)$\", \"^pam_unix\\\\(sudo:session\\\\):\\\\s+session\\\\s+closed\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.target.name}$\", \"^%{NOTSPACE:user.name}\\\\s+:\\\\s+TTY=%{NOTSPACE:terminal}\\\\s+;\\\\s+PWD=%{NOTSPACE:process.working_directory}\\\\s+;\\\\s+USER=%{NOTSPACE:user.target.name}\\\\s+;\\\\s+COMMAND=%{GREEDYDATA:process.command_line}$\", \"^pam_unix\\\\(sshd:auth\\\\):\\\\s+authentication\\\\s+failure;\\\\s+logname=\\\\s+uid=%{INT}\\\\s+euid=%{INT}\\\\s+tty=%{NOTSPACE:terminal}\\\\s+ruser=\\\\s+rhost=%{IP:source.ip}$\", \"^Invalid\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}$\", \"^Connection\\\\s+closed\\\\s+by\\\\s+invalid\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+\\\\[preauth\\\\]$\", \"^Failed\\\\s+password\\\\s+for\\\\s+invalid\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+closed\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.name}$\", \"^Received\\\\s+disconnect\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}:\\\\d+:\\\\s+disconnected\\\\s+by\\\\s+user$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+opened\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.target.name}\\\\(uid=\\\\d+\\\\)\\\\s+by\\\\s+%{NOTSPACE:user.name}\\\\(uid=\\\\d+\\\\)$\", \"^Disconnected\\\\s+from\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}$\", \"^Accepted\\\\s+password\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\"], \"ignore_failure\": true}}, {\"rename\": {\"field\": \"host.hostname\", \"target_field\": \"host.name\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"process.pid\", \"type\": \"long\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"source.port\", \"type\": \"long\", \"ignore_missing\": true}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session closed for user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_closed\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session closed for user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session opened for user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_opened\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session opened for user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Accepted password for'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_authentication\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Accepted password for'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Failed password for invalid user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_authentication\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Failed password for invalid user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Invalid user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_invalid_user\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Invalid user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): authentication failure'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"pam_authentication\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): authentication failure'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): check pass; user unknown'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"pam_unknown_user\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): check pass; user unknown'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Received disconnect from'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_connection_closed\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Received disconnect from'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Disconnected from user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_connection_closed\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Disconnected from user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Connection closed by invalid user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_connection_closed\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Connection closed by invalid user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session opened for user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_opened\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session opened for user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session closed for user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_closed\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session closed for user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().contains('COMMAND='))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"sudo_command_recorded\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().contains('COMMAND='))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sshd')\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sshd')\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sudo')\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sudo')\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (true)\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null && (true)\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.outcome == null\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null\"}}, {\"set\": {\"field\": \"log.category\", \"value\": \"authentication\"}}, {\"remove\": {\"field\": [\"event.dataset\", \"host.hostname\", \"ingestion_channel\", \"log_message\", \"received_at\", \"source_name\", \"timestamp\"], \"ignore_missing\": true}}, {\"remove\": {\"field\": \"event\", \"ignore_missing\": true, \"if\": \"ctx.event instanceof Map && ctx.event.isEmpty()\"}}, {\"remove\": {\"field\": \"host\", \"ignore_missing\": true, \"if\": \"ctx.host instanceof Map && ctx.host.isEmpty()\"}}]",
+    "template_json": "{\"name\": \"logs-v3-mixed-pilot-layout3\", \"source\": \"v3-mixed-pilot-layout3\", \"grok_pattern\": \"%{TIMESTAMP_ISO8601:timestamp} %{DATA:host.hostname} %{DATA:process.name}\\\\[%{POSINT:process.pid}\\\\]: %{DATA:log.logger} %{GREEDYDATA:log_message}\", \"ts_pattern\": \"^%{TIMESTAMP_ISO8601:timestamp}\", \"timestamp_formats\": [\"yyyy-MM-dd HH:mm:ss,SSS\", \"yyyy-MM-dd HH:mm:ss.SSS\", \"yyyy-MM-dd HH:mm:ss\", \"ISO8601\"], \"event_type\": \"authentication\", \"fields\": [\"timestamp\", \"host.hostname\", \"process.name\", \"process.pid\", \"log.logger\", \"log_message\"], \"parse_rate\": 1.0, \"avg_fields\": 6.0, \"example_lines\": [\"2026-10-22T17:07:44.630768+00:00 host_001 sshd[56454]: pam_unix(sshd:auth): check pass; user unknown\", \"2026-10-22T17:10:21.308969+00:00 host_001 sudo[57774]: pam_unix(sudo:session): session opened for user root(uid=0) by user_001(uid=1000)\", \"2026-10-22T17:10:26.451990+00:00 host_001 sudo[57826]: pam_unix(sudo:session): session closed for user root\"], \"model\": \"qwen3:14b\", \"created\": \"2026-10-24T14:39:08\", \"version\": \"4\", \"v4\": {\"header_pattern\": \"%{TIMESTAMP_ISO8601:timestamp} %{DATA:host.hostname} %{DATA:process.name}\\\\[%{POSINT:process.pid}\\\\]: %{GREEDYDATA:log_message}\", \"body_field\": \"log_message\", \"message_patterns\": [\"^pam_unix\\\\(sudo:session\\\\):\\\\s+session\\\\s+opened\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.target.name}\\\\(uid=\\\\d+\\\\)\\\\s+by\\\\s+%{NOTSPACE:user.name}\\\\(uid=\\\\d+\\\\)$\", \"^pam_unix\\\\(sudo:session\\\\):\\\\s+session\\\\s+closed\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.target.name}$\", \"^%{NOTSPACE:user.name}\\\\s+:\\\\s+TTY=%{NOTSPACE:terminal}\\\\s+;\\\\s+PWD=%{NOTSPACE:process.working_directory}\\\\s+;\\\\s+USER=%{NOTSPACE:user.target.name}\\\\s+;\\\\s+COMMAND=%{GREEDYDATA:process.command_line}$\", \"^pam_unix\\\\(sshd:auth\\\\):\\\\s+authentication\\\\s+failure;\\\\s+logname=\\\\s+uid=%{INT}\\\\s+euid=%{INT}\\\\s+tty=%{NOTSPACE:terminal}\\\\s+ruser=\\\\s+rhost=%{IP:source.ip}$\", \"^Invalid\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}$\", \"^Connection\\\\s+closed\\\\s+by\\\\s+invalid\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+\\\\[preauth\\\\]$\", \"^Failed\\\\s+password\\\\s+for\\\\s+invalid\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+closed\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.name}$\", \"^Received\\\\s+disconnect\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}:\\\\d+:\\\\s+disconnected\\\\s+by\\\\s+user$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+opened\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.target.name}\\\\(uid=\\\\d+\\\\)\\\\s+by\\\\s+%{NOTSPACE:user.name}\\\\(uid=\\\\d+\\\\)$\", \"^Disconnected\\\\s+from\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}$\", \"^Accepted\\\\s+password\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\"], \"rename\": {\"host.hostname\": \"host.name\"}, \"drop\": [], \"log_category\": \"authentication\", \"rules\": [{\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"pam_unix(sshd:session): session closed for user\", \"action\": \"session_closed\", \"outcome\": \"success\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"pam_unix(sshd:session): session opened for user\", \"action\": \"session_opened\", \"outcome\": \"success\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"Accepted password for\", \"action\": \"ssh_authentication\", \"outcome\": \"success\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"Failed password for invalid user\", \"action\": \"ssh_authentication\", \"outcome\": \"failure\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"Invalid user\", \"action\": \"ssh_invalid_user\", \"outcome\": \"failure\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"pam_unix(sshd:auth): authentication failure\", \"action\": \"pam_authentication\", \"outcome\": \"failure\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"pam_unix(sshd:auth): check pass; user unknown\", \"action\": \"pam_unknown_user\", \"outcome\": \"failure\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"Received disconnect from\", \"action\": \"ssh_connection_closed\", \"outcome\": \"unknown\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"Disconnected from user\", \"action\": \"ssh_connection_closed\", \"outcome\": \"unknown\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"Connection closed by invalid user\", \"action\": \"ssh_connection_closed\", \"outcome\": \"unknown\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"pam_unix(sudo:session): session opened for user\", \"action\": \"session_opened\", \"outcome\": \"success\"}, {\"field\": \"log_message\", \"op\": \"startswith\", \"value\": \"pam_unix(sudo:session): session closed for user\", \"action\": \"session_closed\", \"outcome\": \"success\"}, {\"field\": \"log_message\", \"op\": \"contains\", \"value\": \"COMMAND=\", \"action\": \"sudo_command_recorded\", \"outcome\": \"unknown\"}, {\"field\": \"process.name\", \"op\": \"equals\", \"value\": \"sshd\", \"action\": \"other\", \"outcome\": \"unknown\"}, {\"field\": \"process.name\", \"op\": \"equals\", \"value\": \"sudo\", \"action\": \"other\", \"outcome\": \"unknown\"}, {\"field\": \"process.name\", \"op\": \"always\", \"value\": \"\", \"action\": \"other\", \"outcome\": \"unknown\"}], \"processors\": [{\"set\": {\"field\": \"message\", \"copy_from\": \"raw_line\", \"if\": \"ctx.message == null && ctx.raw_line != null\"}}, {\"set\": {\"field\": \"event.original\", \"copy_from\": \"message\", \"if\": \"ctx.event?.original == null\"}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"%{TIMESTAMP_ISO8601:timestamp} %{DATA:host.hostname} %{DATA:process.name}\\\\[%{POSINT:process.pid}\\\\]: %{GREEDYDATA:log_message}\"]}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"^%{TIMESTAMP_ISO8601:timestamp}\"]}}, {\"date\": {\"field\": \"timestamp\", \"target_field\": \"@timestamp\", \"formats\": [\"yyyy-MM-dd HH:mm:ss,SSS\", \"yyyy-MM-dd HH:mm:ss.SSS\", \"yyyy-MM-dd HH:mm:ss\", \"ISO8601\"]}}, {\"grok\": {\"field\": \"log_message\", \"patterns\": [\"^pam_unix\\\\(sudo:session\\\\):\\\\s+session\\\\s+opened\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.target.name}\\\\(uid=\\\\d+\\\\)\\\\s+by\\\\s+%{NOTSPACE:user.name}\\\\(uid=\\\\d+\\\\)$\", \"^pam_unix\\\\(sudo:session\\\\):\\\\s+session\\\\s+closed\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.target.name}$\", \"^%{NOTSPACE:user.name}\\\\s+:\\\\s+TTY=%{NOTSPACE:terminal}\\\\s+;\\\\s+PWD=%{NOTSPACE:process.working_directory}\\\\s+;\\\\s+USER=%{NOTSPACE:user.target.name}\\\\s+;\\\\s+COMMAND=%{GREEDYDATA:process.command_line}$\", \"^pam_unix\\\\(sshd:auth\\\\):\\\\s+authentication\\\\s+failure;\\\\s+logname=\\\\s+uid=%{INT}\\\\s+euid=%{INT}\\\\s+tty=%{NOTSPACE:terminal}\\\\s+ruser=\\\\s+rhost=%{IP:source.ip}$\", \"^Invalid\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}$\", \"^Connection\\\\s+closed\\\\s+by\\\\s+invalid\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+\\\\[preauth\\\\]$\", \"^Failed\\\\s+password\\\\s+for\\\\s+invalid\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+closed\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.name}$\", \"^Received\\\\s+disconnect\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}:\\\\d+:\\\\s+disconnected\\\\s+by\\\\s+user$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+opened\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.target.name}\\\\(uid=\\\\d+\\\\)\\\\s+by\\\\s+%{NOTSPACE:user.name}\\\\(uid=\\\\d+\\\\)$\", \"^Disconnected\\\\s+from\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}$\", \"^Accepted\\\\s+password\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\"], \"ignore_failure\": true}}, {\"rename\": {\"field\": \"host.hostname\", \"target_field\": \"host.name\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"process.pid\", \"type\": \"long\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"source.port\", \"type\": \"long\", \"ignore_missing\": true}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session closed for user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_closed\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session closed for user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session opened for user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_opened\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session opened for user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Accepted password for'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_authentication\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Accepted password for'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Failed password for invalid user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_authentication\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Failed password for invalid user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Invalid user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_invalid_user\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Invalid user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): authentication failure'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"pam_authentication\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): authentication failure'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): check pass; user unknown'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"pam_unknown_user\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): check pass; user unknown'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Received disconnect from'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_connection_closed\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Received disconnect from'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Disconnected from user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_connection_closed\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Disconnected from user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Connection closed by invalid user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_connection_closed\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Connection closed by invalid user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session opened for user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_opened\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session opened for user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session closed for user'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_closed\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session closed for user'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().contains('COMMAND='))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"sudo_command_recorded\", \"if\": \"ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().contains('COMMAND='))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sshd')\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sshd')\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sudo')\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sudo')\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (true)\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null && (true)\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.outcome == null\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null\"}}, {\"set\": {\"field\": \"log.category\", \"value\": \"authentication\"}}, {\"remove\": {\"field\": [\"event.dataset\", \"host.hostname\", \"ingestion_channel\", \"log_message\", \"received_at\", \"source_name\", \"timestamp\"], \"ignore_missing\": true}}, {\"remove\": {\"field\": \"event\", \"ignore_missing\": true, \"if\": \"ctx.event instanceof Map && ctx.event.isEmpty()\"}}, {\"remove\": {\"field\": \"host\", \"ignore_missing\": true, \"if\": \"ctx.host instanceof Map && ctx.host.isEmpty()\"}}]}}"
+  },
+  "pipeline": {
+    "description": "Schema Agent v4 template for v3-mixed-pilot-layout3",
+    "processors": [
+      {
+        "set": {
+          "field": "message",
+          "copy_from": "raw_line",
+          "if": "ctx.message == null && ctx.raw_line != null"
+        }
+      },
+      {
+        "set": {
+          "field": "event.original",
+          "copy_from": "message",
+          "if": "ctx.event?.original == null"
+        }
+      },
+      {
+        "grok": {
+          "field": "message",
+          "patterns": [
+            "%{TIMESTAMP_ISO8601:timestamp} %{DATA:host.hostname} %{DATA:process.name}\\[%{POSINT:process.pid}\\]: %{GREEDYDATA:log_message}"
+          ]
+        }
+      },
+      {
+        "grok": {
+          "field": "message",
+          "patterns": [
+            "^%{TIMESTAMP_ISO8601:timestamp}"
+          ]
+        }
+      },
+      {
+        "date": {
+          "field": "timestamp",
+          "target_field": "@timestamp",
+          "formats": [
+            "yyyy-MM-dd HH:mm:ss,SSS",
+            "yyyy-MM-dd HH:mm:ss.SSS",
+            "yyyy-MM-dd HH:mm:ss",
+            "ISO8601"
+          ]
+        }
+      },
+      {
+        "grok": {
+          "field": "log_message",
+          "patterns": [
+            "^pam_unix\\(sudo:session\\):\\s+session\\s+opened\\s+for\\s+user\\s+%{NOTSPACE:user.target.name}\\(uid=\\d+\\)\\s+by\\s+%{NOTSPACE:user.name}\\(uid=\\d+\\)$",
+            "^pam_unix\\(sudo:session\\):\\s+session\\s+closed\\s+for\\s+user\\s+%{NOTSPACE:user.target.name}$",
+            "^%{NOTSPACE:user.name}\\s+:\\s+TTY=%{NOTSPACE:terminal}\\s+;\\s+PWD=%{NOTSPACE:process.working_directory}\\s+;\\s+USER=%{NOTSPACE:user.target.name}\\s+;\\s+COMMAND=%{GREEDYDATA:process.command_line}$",
+            "^pam_unix\\(sshd:auth\\):\\s+authentication\\s+failure;\\s+logname=\\s+uid=%{INT}\\s+euid=%{INT}\\s+tty=%{NOTSPACE:terminal}\\s+ruser=\\s+rhost=%{IP:source.ip}$",
+            "^Invalid\\s+user\\s+%{NOTSPACE:user.name}\\s+from\\s+%{IP:source.ip}\\s+port\\s+%{INT:source.port}$",
+            "^Connection\\s+closed\\s+by\\s+invalid\\s+user\\s+%{NOTSPACE:user.name}\\s+%{IP:source.ip}\\s+port\\s+%{INT:source.port}\\s+\\[preauth\\]$",
+            "^Failed\\s+password\\s+for\\s+invalid\\s+user\\s+%{NOTSPACE:user.name}\\s+from\\s+%{IP:source.ip}\\s+port\\s+%{INT:source.port}\\s+%{NOTSPACE}$",
+            "^pam_unix\\(sshd:session\\):\\s+session\\s+closed\\s+for\\s+user\\s+%{NOTSPACE:user.name}$",
+            "^Received\\s+disconnect\\s+from\\s+%{IP:source.ip}\\s+port\\s+%{INT:source.port}:\\d+:\\s+disconnected\\s+by\\s+user$",
+            "^pam_unix\\(sshd:session\\):\\s+session\\s+opened\\s+for\\s+user\\s+%{NOTSPACE:user.target.name}\\(uid=\\d+\\)\\s+by\\s+%{NOTSPACE:user.name}\\(uid=\\d+\\)$",
+            "^Disconnected\\s+from\\s+user\\s+%{NOTSPACE:user.name}\\s+%{IP:source.ip}\\s+port\\s+%{INT:source.port}$",
+            "^Accepted\\s+password\\s+for\\s+%{NOTSPACE:user.name}\\s+from\\s+%{IP:source.ip}\\s+port\\s+%{INT:source.port}\\s+%{NOTSPACE}$"
+          ],
+          "ignore_failure": true
+        }
+      },
+      {
+        "rename": {
+          "field": "host.hostname",
+          "target_field": "host.name",
+          "ignore_missing": true
+        }
+      },
+      {
+        "convert": {
+          "field": "process.pid",
+          "type": "long",
+          "ignore_missing": true
+        }
+      },
+      {
+        "convert": {
+          "field": "source.port",
+          "type": "long",
+          "ignore_missing": true
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "success",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session closed for user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "session_closed",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session closed for user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "success",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session opened for user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "session_opened",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:session): session opened for user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "success",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Accepted password for'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "ssh_authentication",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Accepted password for'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "failure",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Failed password for invalid user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "ssh_authentication",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Failed password for invalid user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "failure",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Invalid user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "ssh_invalid_user",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Invalid user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "failure",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): authentication failure'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "pam_authentication",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): authentication failure'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "failure",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): check pass; user unknown'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "pam_unknown_user",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sshd:auth): check pass; user unknown'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Received disconnect from'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "ssh_connection_closed",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Received disconnect from'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Disconnected from user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "ssh_connection_closed",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Disconnected from user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Connection closed by invalid user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "ssh_connection_closed",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('Connection closed by invalid user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "success",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session opened for user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "session_opened",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session opened for user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "success",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session closed for user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "session_closed",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().startsWith('pam_unix(sudo:session): session closed for user'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().contains('COMMAND='))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "sudo_command_recorded",
+          "if": "ctx.event?.action == null && (ctx.log_message != null && ctx.log_message.toString().contains('COMMAND='))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sshd')"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "other",
+          "if": "ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sshd')"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sudo')"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "other",
+          "if": "ctx.event?.action == null && (ctx.process?.name != null && ctx.process?.name.toString() == 'sudo')"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (true)"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "other",
+          "if": "ctx.event?.action == null && (true)"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.outcome == null"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "other",
+          "if": "ctx.event?.action == null"
+        }
+      },
+      {
+        "set": {
+          "field": "log.category",
+          "value": "authentication"
+        }
+      },
+      {
+        "remove": {
+          "field": [
+            "event.dataset",
+            "host.hostname",
+            "ingestion_channel",
+            "log_message",
+            "received_at",
+            "source_name",
+            "timestamp"
+          ],
+          "ignore_missing": true
+        }
+      },
+      {
+        "remove": {
+          "field": "event",
+          "ignore_missing": true,
+          "if": "ctx.event instanceof Map && ctx.event.isEmpty()"
+        }
+      },
+      {
+        "remove": {
+          "field": "host",
+          "ignore_missing": true,
+          "if": "ctx.host instanceof Map && ctx.host.isEmpty()"
+        }
+      }
+    ],
+    "_meta": {
+      "created_by": "schema_agent_v4",
+      "model": "qwen3:14b"
+    }
+  },
+  "pipeline_sha256": "3330161760eb689dccfd7ee89473d57f822b2011128e6a5cea294752e4051a57"
+}

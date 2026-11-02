@@ -1,0 +1,151 @@
+{
+  "name": "logs-v3-mixed-pilot-layout2",
+  "registry": {
+    "name": "logs-v3-mixed-pilot-layout2",
+    "feed_name": "v3-mixed-pilot",
+    "layout_shape": "9.9.9.9 -",
+    "version": "4",
+    "model": "qwen3:14b",
+    "updated": "2026-10-24T08:59:15+00:00",
+    "processors_json": "[{\"set\": {\"field\": \"message\", \"copy_from\": \"raw_line\", \"if\": \"ctx.message == null && ctx.raw_line != null\"}}, {\"set\": {\"field\": \"event.original\", \"copy_from\": \"message\", \"if\": \"ctx.event?.original == null\"}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"%{IPORHOST:source.ip} - - \\\\[%{HTTPDATE:timestamp}\\\\] \\\"%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}\\\" %{INT:http.response.status_code} %{INT:http.response.bytes} \\\"-\\\" \\\"%{DATA:user_agent.original}\\\"\"]}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"\\\\[%{HTTPDATE:timestamp}\\\\]\"]}}, {\"date\": {\"field\": \"timestamp\", \"target_field\": \"@timestamp\", \"formats\": [\"dd/MMM/yyyy:HH:mm:ss Z\"]}}, {\"rename\": {\"field\": \"http.response.bytes\", \"target_field\": \"http.response.body.bytes\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"http.response.body.bytes\", \"type\": \"long\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"http.response.status_code\", \"type\": \"long\", \"ignore_missing\": true}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.http?.request?.method != null && ctx.http?.request?.method.toString().startsWith('GET'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"http_request\", \"if\": \"ctx.event?.action == null && (ctx.http?.request?.method != null && ctx.http?.request?.method.toString().startsWith('GET'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.outcome == null\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null\"}}, {\"set\": {\"field\": \"log.category\", \"value\": \"web_access\"}}, {\"remove\": {\"field\": [\"event.dataset\", \"http.response.bytes\", \"ingestion_channel\", \"received_at\", \"source_name\", \"timestamp\"], \"ignore_missing\": true}}, {\"remove\": {\"field\": \"http.response\", \"ignore_missing\": true, \"if\": \"ctx.http?.response instanceof Map && ctx.http?.response.isEmpty()\"}}, {\"remove\": {\"field\": \"event\", \"ignore_missing\": true, \"if\": \"ctx.event instanceof Map && ctx.event.isEmpty()\"}}, {\"remove\": {\"field\": \"http\", \"ignore_missing\": true, \"if\": \"ctx.http instanceof Map && ctx.http.isEmpty()\"}}]",
+    "template_json": "{\"name\": \"logs-v3-mixed-pilot-layout2\", \"source\": \"v3-mixed-pilot-layout2\", \"grok_pattern\": \"%{IPORHOST:source.ip} - - \\\\[%{HTTPDATE:timestamp}\\\\] \\\"%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}\\\" %{INT:http.response.status_code} %{INT:http.response.bytes} \\\"-\\\" \\\"%{DATA:user_agent.original}\\\"\", \"ts_pattern\": \"\\\\[%{HTTPDATE:timestamp}\\\\]\", \"timestamp_formats\": [\"dd/MMM/yyyy:HH:mm:ss Z\"], \"event_type\": \"web\", \"fields\": [\"source.ip\", \"timestamp\", \"http.request.method\", \"url.original\", \"http.version\", \"http.response.status_code\", \"http.response.bytes\", \"user_agent.original\"], \"parse_rate\": 1.0, \"avg_fields\": 8.0, \"example_lines\": [\"192.0.2.2 - - [22/Oct/2026:17:01:41 +0000] \\\"GET /server-status HTTP/1.1\\\" 404 146 \\\"-\\\" \\\"SentinelHuntLab/1.0 65f9fe030106-web-session-005\\\"\", \"192.0.2.2 - - [22/Oct/2026:17:01:56 +0000] \\\"GET / HTTP/1.1\\\" 200 21 \\\"-\\\" \\\"SentinelHuntLab/1.0 65f9fe030106-web-session-015\\\"\", \"192.0.2.2 - - [22/Oct/2026:17:01:47 +0000] \\\"GET / HTTP/1.1\\\" 200 21 \\\"-\\\" \\\"SentinelHuntLab/1.0 65f9fe030106-web-session-009\\\"\"], \"model\": \"qwen3:14b\", \"created\": \"2026-10-24T16:59:13\", \"version\": \"4\", \"v4\": {\"header_pattern\": \"%{IPORHOST:source.ip} - - \\\\[%{HTTPDATE:timestamp}\\\\] \\\"%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}\\\" %{INT:http.response.status_code} %{INT:http.response.bytes} \\\"-\\\" \\\"%{DATA:user_agent.original}\\\"\", \"body_field\": null, \"message_patterns\": [], \"rename\": {\"http.response.bytes\": \"http.response.body.bytes\"}, \"drop\": [], \"log_category\": \"web_access\", \"rules\": [{\"field\": \"http.request.method\", \"op\": \"startswith\", \"value\": \"GET\", \"action\": \"http_request\", \"outcome\": \"unknown\"}], \"processors\": [{\"set\": {\"field\": \"message\", \"copy_from\": \"raw_line\", \"if\": \"ctx.message == null && ctx.raw_line != null\"}}, {\"set\": {\"field\": \"event.original\", \"copy_from\": \"message\", \"if\": \"ctx.event?.original == null\"}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"%{IPORHOST:source.ip} - - \\\\[%{HTTPDATE:timestamp}\\\\] \\\"%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}\\\" %{INT:http.response.status_code} %{INT:http.response.bytes} \\\"-\\\" \\\"%{DATA:user_agent.original}\\\"\"]}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"\\\\[%{HTTPDATE:timestamp}\\\\]\"]}}, {\"date\": {\"field\": \"timestamp\", \"target_field\": \"@timestamp\", \"formats\": [\"dd/MMM/yyyy:HH:mm:ss Z\"]}}, {\"rename\": {\"field\": \"http.response.bytes\", \"target_field\": \"http.response.body.bytes\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"http.response.body.bytes\", \"type\": \"long\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"http.response.status_code\", \"type\": \"long\", \"ignore_missing\": true}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.http?.request?.method != null && ctx.http?.request?.method.toString().startsWith('GET'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"http_request\", \"if\": \"ctx.event?.action == null && (ctx.http?.request?.method != null && ctx.http?.request?.method.toString().startsWith('GET'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.outcome == null\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null\"}}, {\"set\": {\"field\": \"log.category\", \"value\": \"web_access\"}}, {\"remove\": {\"field\": [\"event.dataset\", \"http.response.bytes\", \"ingestion_channel\", \"received_at\", \"source_name\", \"timestamp\"], \"ignore_missing\": true}}, {\"remove\": {\"field\": \"http.response\", \"ignore_missing\": true, \"if\": \"ctx.http?.response instanceof Map && ctx.http?.response.isEmpty()\"}}, {\"remove\": {\"field\": \"event\", \"ignore_missing\": true, \"if\": \"ctx.event instanceof Map && ctx.event.isEmpty()\"}}, {\"remove\": {\"field\": \"http\", \"ignore_missing\": true, \"if\": \"ctx.http instanceof Map && ctx.http.isEmpty()\"}}]}}"
+  },
+  "pipeline": {
+    "description": "Schema Agent v4 template for v3-mixed-pilot-layout2",
+    "processors": [
+      {
+        "set": {
+          "field": "message",
+          "copy_from": "raw_line",
+          "if": "ctx.message == null && ctx.raw_line != null"
+        }
+      },
+      {
+        "set": {
+          "field": "event.original",
+          "copy_from": "message",
+          "if": "ctx.event?.original == null"
+        }
+      },
+      {
+        "grok": {
+          "field": "message",
+          "patterns": [
+            "%{IPORHOST:source.ip} - - \\[%{HTTPDATE:timestamp}\\] \"%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}\" %{INT:http.response.status_code} %{INT:http.response.bytes} \"-\" \"%{DATA:user_agent.original}\""
+          ]
+        }
+      },
+      {
+        "grok": {
+          "field": "message",
+          "patterns": [
+            "\\[%{HTTPDATE:timestamp}\\]"
+          ]
+        }
+      },
+      {
+        "date": {
+          "field": "timestamp",
+          "target_field": "@timestamp",
+          "formats": [
+            "dd/MMM/yyyy:HH:mm:ss Z"
+          ]
+        }
+      },
+      {
+        "rename": {
+          "field": "http.response.bytes",
+          "target_field": "http.response.body.bytes",
+          "ignore_missing": true
+        }
+      },
+      {
+        "convert": {
+          "field": "http.response.body.bytes",
+          "type": "long",
+          "ignore_missing": true
+        }
+      },
+      {
+        "convert": {
+          "field": "http.response.status_code",
+          "type": "long",
+          "ignore_missing": true
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (ctx.http?.request?.method != null && ctx.http?.request?.method.toString().startsWith('GET'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "http_request",
+          "if": "ctx.event?.action == null && (ctx.http?.request?.method != null && ctx.http?.request?.method.toString().startsWith('GET'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.outcome == null"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "other",
+          "if": "ctx.event?.action == null"
+        }
+      },
+      {
+        "set": {
+          "field": "log.category",
+          "value": "web_access"
+        }
+      },
+      {
+        "remove": {
+          "field": [
+            "event.dataset",
+            "http.response.bytes",
+            "ingestion_channel",
+            "received_at",
+            "source_name",
+            "timestamp"
+          ],
+          "ignore_missing": true
+        }
+      },
+      {
+        "remove": {
+          "field": "http.response",
+          "ignore_missing": true,
+          "if": "ctx.http?.response instanceof Map && ctx.http?.response.isEmpty()"
+        }
+      },
+      {
+        "remove": {
+          "field": "event",
+          "ignore_missing": true,
+          "if": "ctx.event instanceof Map && ctx.event.isEmpty()"
+        }
+      },
+      {
+        "remove": {
+          "field": "http",
+          "ignore_missing": true,
+          "if": "ctx.http instanceof Map && ctx.http.isEmpty()"
+        }
+      }
+    ],
+    "_meta": {
+      "created_by": "schema_agent_v4",
+      "model": "qwen3:14b"
+    }
+  },
+  "pipeline_sha256": "d80f44ecf2f610af5b475c92048b3f886037e9ffe727cfd89353e748134eeca4"
+}

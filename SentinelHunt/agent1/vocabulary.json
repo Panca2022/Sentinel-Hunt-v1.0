@@ -1,0 +1,91 @@
+{
+  "_about": "Fixed vocabulary for derived fields (Agent 1 v4 stage E). Agent 1 may ONLY use these values; code rejects anything else. Agreed interface with the teammate (option A, 24 Oct). Source: values used in the teammate's v3 parsing reference, adopted as the contract; report this when scoring against that reference. Outcomes are fixed per action (the firewall verdict lives in event.action, not event.outcome - see teammate schema.json 'firewall_outcome'; a log line that only records an event has outcome unknown).",
+  "log.category": [
+    "authentication",
+    "web_access",
+    "firewall",
+    "other"
+  ],
+  "event.outcome": [
+    "success",
+    "failure",
+    "unknown"
+  ],
+  "event.action": {
+    "ssh_authentication": {
+      "description": "sshd password/publickey result line (Accepted ... / Failed password ..., including 'Failed password for invalid user ...')",
+      "outcomes": [
+        "success",
+        "failure"
+      ]
+    },
+    "ssh_invalid_user": {
+      "description": "sshd line that STARTS with 'Invalid user X from IP'. NOT the 'Failed password for invalid user ...' line (that one is ssh_authentication)",
+      "outcomes": [
+        "failure"
+      ]
+    },
+    "ssh_connection_closed": {
+      "description": "sshd connection ended: 'Connection closed by ...', 'Disconnected from ...', 'Received disconnect from ...' (even if it mentions an invalid user)",
+      "outcomes": [
+        "unknown"
+      ]
+    },
+    "pam_authentication": {
+      "description": "pam_unix authentication failure line",
+      "outcomes": [
+        "failure"
+      ]
+    },
+    "pam_unknown_user": {
+      "description": "pam_unix 'check pass; user unknown' line",
+      "outcomes": [
+        "failure"
+      ]
+    },
+    "session_opened": {
+      "description": "pam_unix session opened for user",
+      "outcomes": [
+        "success"
+      ]
+    },
+    "session_closed": {
+      "description": "pam_unix session closed for user",
+      "outcomes": [
+        "success"
+      ]
+    },
+    "sudo_command_recorded": {
+      "description": "sudo line recording a command (COMMAND=...)",
+      "outcomes": [
+        "unknown"
+      ]
+    },
+    "http_request": {
+      "description": "web server access log request line",
+      "outcomes": [
+        "unknown"
+      ]
+    },
+    "network_allow": {
+      "description": "firewall packet allowed by rule",
+      "outcomes": [
+        "unknown"
+      ]
+    },
+    "network_drop": {
+      "description": "firewall packet dropped/blocked by rule",
+      "outcomes": [
+        "unknown"
+      ]
+    },
+    "other": {
+      "description": "none of the above",
+      "outcomes": [
+        "success",
+        "failure",
+        "unknown"
+      ]
+    }
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "record_id": {
+        "type": "keyword"
+      },
+      "capture_id": {
+        "type": "keyword"
+      },
+      "feed_name": {
+        "type": "keyword"
+      },
+      "raw_line": {
+        "type": "text"
+      },
+      "message": {
+        "type": "text"
+      },
+      "event": {
+        "properties": {
+          "original": {
+            "type": "text"
+          },
+          "action": {
+            "type": "keyword"
+          },
+          "outcome": {
+            "type": "keyword"
+          }
+        }
+      },
+      "source": {
+        "properties": {
+          "ip": {
+            "type": "ip"
+          },
+          "port": {
+            "type": "integer"
+          }
+        }
+      },
+      "destination": {
+        "properties": {
+          "ip": {
+            "type": "ip"
+          },
+          "port": {
+            "type": "integer"
+          }
+        }
+      },
+      "user": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "target": {
+            "properties": {
+              "name": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "host": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "log": {
+        "properties": {
+          "category": {
+            "type": "keyword"
+          }
+        }
+      },
+      "process": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "pid": {
+            "type": "long"
+          },
+          "command_line": {
+            "type": "keyword"
+          },
+          "working_directory": {
+            "type": "keyword"
+          }
+        }
+      },
+      "terminal": {
+        "type": "keyword"
+      },
+      "network": {
+        "properties": {
+          "transport": {
+            "type": "keyword"
+          },
+          "bytes": {
+            "type": "long"
+          }
+        }
+      },
+      "rule": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "http": {
+        "properties": {
+          "version": {
+            "type": "keyword"
+          },
+          "request": {
+            "properties": {
+              "method": {
+                "type": "keyword"
+              },
+              "referrer": {
+                "type": "keyword"
+              }
+            }
+          },
+          "response": {
+            "properties": {
+              "status_code": {
+                "type": "integer"
+              },
+              "body": {
+                "properties": {
+                  "bytes": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "url": {
+        "properties": {
+          "original": {
+            "type": "keyword"
+          }
+        }
+      },
+      "user_agent": {
+        "properties": {
+          "original": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+Oct 24 09:22:15 bastion-02 sshd[7300]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=deploy
+Oct 24 09:22:17 bastion-02 sshd[7300]: Failed password for deploy from 203.0.113.45 port 40927 ssh2
+Oct 24 09:22:22 bastion-02 sshd[7303]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=deploy
+Oct 24 09:22:25 bastion-02 sshd[7303]: Failed password for deploy from 203.0.113.45 port 43691 ssh2
+Oct 24 09:22:29 bastion-02 sshd[7306]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=deploy
+Oct 24 09:22:30 bastion-02 sshd[7306]: Failed password for deploy from 203.0.113.45 port 50010 ssh2
+Oct 24 09:22:36 bastion-02 sshd[7309]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=deploy
+Oct 24 09:22:39 bastion-02 sshd[7309]: Failed password for deploy from 203.0.113.45 port 33150 ssh2
+Oct 24 09:22:44 bastion-02 sshd[7313]: Accepted password for deploy from 203.0.113.45 port 41377 ssh2
+Oct 24 09:22:44 bastion-02 sshd[7313]: pam_unix(sshd:session): session opened for user deploy(uid=1005) by (uid=0)

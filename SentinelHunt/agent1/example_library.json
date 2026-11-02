@@ -1,0 +1,76 @@
+[
+  {
+    "name": "apache-access-combined",
+    "event_type": "web",
+    "example_lines": [
+      "192.168.1.10 - - [12/Mar/2026:10:15:32 +0800] \"GET /index.php?id=1 HTTP/1.1\" 200 5123 \"-\" \"Mozilla/5.0 (Windows NT 10.0)\"",
+      "203.0.113.9 - admin [12/Mar/2026:10:15:40 +0800] \"POST /login HTTP/1.1\" 401 312 \"https://example.com/\" \"curl/8.4.0\""
+    ],
+    "grok_pattern": "%{IPORHOST:source.ip} %{USER:ident} %{USER:user.name} \\[%{HTTPDATE:timestamp}\\] \"%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}\" %{INT:http.response.status_code} (?:%{INT:http.response.bytes}|-) \"%{DATA:http.request.referrer}\" \"%{DATA:user_agent.original}\"",
+    "timestamp_formats": [
+      "dd/MMM/yyyy:HH:mm:ss Z"
+    ]
+  },
+  {
+    "name": "nginx-error",
+    "event_type": "web",
+    "example_lines": [
+      "2026/03/12 10:15:32 [error] 1234#1234: *5 open() \"/var/www/html/admin.php\" failed (2: No such file or directory), client: 10.0.0.5, server: example.com",
+      "2026/03/12 10:16:01 [warn] 1234#1234: *9 an upstream response is buffered to a temporary file"
+    ],
+    "grok_pattern": "(?<timestamp>%{YEAR}/%{MONTHNUM}/%{MONTHDAY} %{TIME}) \\[%{LOGLEVEL:log.level}\\] %{POSINT:process.pid}#%{NUMBER:process.thread.id}: %{GREEDYDATA:log_message}",
+    "timestamp_formats": [
+      "yyyy/MM/dd HH:mm:ss"
+    ]
+  },
+  {
+    "name": "iptables-kernel",
+    "event_type": "network",
+    "example_lines": [
+      "Mar 12 10:15:32 fw01 kernel: [12345.678901] DROP IN=eth0 OUT= MAC=00:11:22:33:44:55:66:77:88:99:aa:bb:08:00 SRC=203.0.113.5 DST=10.0.0.2 LEN=60 TOS=0x00 PREC=0x00 TTL=50 ID=54321 DF PROTO=TCP SPT=51515 DPT=22 WINDOW=29200 RES=0x00 SYN URGP=0",
+      "Mar 12 10:15:35 fw01 kernel: [12348.100200] ACCEPT IN=eth1 OUT=eth0 SRC=10.0.0.7 DST=8.8.8.8 LEN=84 TOS=0x00 PREC=0x00 TTL=63 ID=0 DF PROTO=ICMP TYPE=8 CODE=0 ID=1 SEQ=1"
+    ],
+    "grok_pattern": "%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:host.hostname} kernel: \\[\\s*%{NUMBER:uptime}\\] %{WORD:event.action} IN=%{DATA:observer.ingress.interface} OUT=%{DATA:observer.egress.interface} (?:MAC=%{NOTSPACE:mac} )?SRC=%{IP:source.ip} DST=%{IP:destination.ip} %{DATA:ip_header}PROTO=%{WORD:network.transport}(?: SPT=%{INT:source.port} DPT=%{INT:destination.port})?%{GREEDYDATA:log_message}",
+    "timestamp_formats": [
+      "MMM d HH:mm:ss",
+      "MMM  d HH:mm:ss"
+    ]
+  },
+  {
+    "name": "java-log4j",
+    "event_type": "application",
+    "example_lines": [
+      "2026-03-12 10:15:32,123 INFO  [main] org.apache.catalina.startup.Catalina: Server startup in 1234 ms",
+      "2026-03-12 10:15:40,551 ERROR [http-nio-8080-exec-3] com.example.api.UserController: Login failed for user bob"
+    ],
+    "grok_pattern": "%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:log.level}\\s+\\[%{DATA:process.thread.name}\\] %{JAVACLASS:log.logger}: %{GREEDYDATA:log_message}",
+    "timestamp_formats": [
+      "yyyy-MM-dd HH:mm:ss,SSS"
+    ]
+  },
+  {
+    "name": "syslog-generic",
+    "event_type": "system",
+    "example_lines": [
+      "Mar 12 10:15:32 mail01 postfix/smtpd[2345]: connect from unknown[198.51.100.7]",
+      "Mar 12 10:15:33 web02 CRON[8812]: (root) CMD (run-parts /etc/cron.hourly)"
+    ],
+    "grok_pattern": "%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:host.hostname} %{DATA:process.name}\\[%{POSINT:process.pid}\\]: %{GREEDYDATA:log_message}",
+    "timestamp_formats": [
+      "MMM d HH:mm:ss",
+      "MMM  d HH:mm:ss"
+    ]
+  },
+  {
+    "name": "fortigate-kv",
+    "event_type": "network",
+    "example_lines": [
+      "date=2026-03-12 time=10:15:32 devname=FGT01 type=traffic action=deny srcip=203.0.113.5 dstip=10.0.0.2 dstport=443",
+      "date=2026-03-12 time=10:15:36 devname=FGT01 type=traffic action=accept srcip=10.0.0.7 dstip=93.184.216.34 dstport=80"
+    ],
+    "grok_pattern": "date=(?<timestamp>%{YEAR}-%{MONTHNUM}-%{MONTHDAY}) time=%{TIME:time} devname=%{DATA:observer.name} type=%{WORD:event.category} action=%{WORD:event.action} srcip=%{IP:source.ip} dstip=%{IP:destination.ip} dstport=%{INT:destination.port}",
+    "timestamp_formats": [
+      "yyyy-MM-dd"
+    ]
+  }
+]

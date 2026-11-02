@@ -1,0 +1,248 @@
+{
+  "name": "logs-bastion-02-auth-layout1",
+  "registry": {
+    "name": "logs-bastion-02-auth-layout1",
+    "feed_name": "bastion-02-auth",
+    "layout_shape": "a 9",
+    "version": "4",
+    "model": "qwen3:14b",
+    "updated": "2026-10-25T12:02:58+00:00",
+    "processors_json": "[{\"set\": {\"field\": \"message\", \"copy_from\": \"raw_line\", \"if\": \"ctx.message == null && ctx.raw_line != null\"}}, {\"set\": {\"field\": \"event.original\", \"copy_from\": \"message\", \"if\": \"ctx.event?.original == null\"}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"%{SYSLOGTIMESTAMP:timestamp}\\\\s*%{HOSTNAME:host.hostname} %{DATA:process.name}\\\\[%{POSINT:process.pid}\\\\]: %{GREEDYDATA:message_body}\"]}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"^%{SYSLOGTIMESTAMP:timestamp}\"]}}, {\"date\": {\"field\": \"timestamp\", \"target_field\": \"@timestamp\", \"formats\": [\"MMM d HH:mm:ss\", \"MMM  d HH:mm:ss\"]}}, {\"grok\": {\"field\": \"message_body\", \"patterns\": [\"^pam_unix\\\\(sshd:auth\\\\):\\\\s+authentication\\\\s+failure;\\\\s+logname=\\\\s+uid=%{INT}\\\\s+euid=%{INT}\\\\s+tty=%{NOTSPACE:terminal}\\\\s+ruser=\\\\s+rhost=%{IP:source.ip}\\\\s+user=%{NOTSPACE:user.name}$\", \"^Failed\\\\s+password\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+opened\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\(uid=\\\\d+\\\\)\\\\s+by\\\\s+\\\\(uid=%{NOTSPACE}$\", \"^Accepted\\\\s+password\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\", \"^Accepted\\\\s+publickey\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}:\\\\s+%{NOTSPACE}\\\\s+%{NOTSPACE}$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+closed\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.name}$\"], \"ignore_failure\": true}}, {\"rename\": {\"field\": \"host.hostname\", \"target_field\": \"host.name\", \"ignore_missing\": true}}, {\"grok\": {\"field\": \"process.name\", \"patterns\": [\"^(?<process.name>[^\\\\[\\\\s]+)\\\\[(?<process.pid>\\\\d+)\\\\]:?$\"], \"ignore_missing\": true, \"ignore_failure\": true}}, {\"convert\": {\"field\": \"process.pid\", \"type\": \"long\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"process.pid\", \"type\": \"long\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"source.port\", \"type\": \"long\", \"ignore_missing\": true}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:auth): authentication failure'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"pam_authentication\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:auth): authentication failure'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session opened'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_opened\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session opened'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session closed'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_closed\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session closed'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted publickey'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_authentication\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted publickey'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted password'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_authentication\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted password'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Failed password'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_authentication\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Failed password'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.outcome == null\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null\"}}, {\"set\": {\"field\": \"log.category\", \"value\": \"authentication\"}}, {\"remove\": {\"field\": [\"event.dataset\", \"host.hostname\", \"ingestion_channel\", \"message_body\", \"received_at\", \"source_name\", \"timestamp\"], \"ignore_missing\": true}}, {\"remove\": {\"field\": \"event\", \"ignore_missing\": true, \"if\": \"ctx.event instanceof Map && ctx.event.isEmpty()\"}}, {\"remove\": {\"field\": \"host\", \"ignore_missing\": true, \"if\": \"ctx.host instanceof Map && ctx.host.isEmpty()\"}}]",
+    "template_json": "{\"name\": \"logs-bastion-02-auth-layout1\", \"source\": \"bastion-02-auth-layout1\", \"grok_pattern\": \"%{SYSLOGTIMESTAMP:timestamp}\\\\s*%{HOSTNAME:host.hostname} %{DATA:process.name}\\\\[%{POSINT:process.pid}\\\\]: %{GREEDYDATA:message_body}\", \"ts_pattern\": \"^%{SYSLOGTIMESTAMP:timestamp}\", \"timestamp_formats\": [\"MMM d HH:mm:ss\", \"MMM  d HH:mm:ss\"], \"event_type\": \"authentication\", \"fields\": [\"host.hostname\", \"process.name\", \"process.pid\", \"event.action\", \"user.name\", \"source.ip\", \"source.port\"], \"parse_rate\": 1.0, \"avg_fields\": 5.0, \"example_lines\": [\"Oct 24 09:16:49 bastion-02 sshd[7224]: Failed password for deploy from 203.0.113.45 port 38160 ssh2\", \"Oct 24 09:15:45 bastion-02 sshd[7200]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=deploy\", \"Oct 24 09:15:02 bastion-02 sshd[7101]: Accepted publickey for user_003 from 192.0.2.20 port 50211 ssh2: ED25519 SHA256:q7Lk2v\"], \"model\": \"qwen3:14b\", \"created\": \"2026-10-25T20:00:40\", \"version\": \"4\", \"v4\": {\"header_pattern\": \"%{SYSLOGTIMESTAMP:timestamp}\\\\s*%{HOSTNAME:host.hostname} %{DATA:process.name}\\\\[%{POSINT:process.pid}\\\\]: %{GREEDYDATA:message_body}\", \"body_field\": \"message_body\", \"message_patterns\": [\"^pam_unix\\\\(sshd:auth\\\\):\\\\s+authentication\\\\s+failure;\\\\s+logname=\\\\s+uid=%{INT}\\\\s+euid=%{INT}\\\\s+tty=%{NOTSPACE:terminal}\\\\s+ruser=\\\\s+rhost=%{IP:source.ip}\\\\s+user=%{NOTSPACE:user.name}$\", \"^Failed\\\\s+password\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+opened\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\(uid=\\\\d+\\\\)\\\\s+by\\\\s+\\\\(uid=%{NOTSPACE}$\", \"^Accepted\\\\s+password\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\", \"^Accepted\\\\s+publickey\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}:\\\\s+%{NOTSPACE}\\\\s+%{NOTSPACE}$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+closed\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.name}$\"], \"rename\": {\"host.hostname\": \"host.name\"}, \"drop\": [], \"log_category\": \"authentication\", \"rules\": [{\"field\": \"message_body\", \"op\": \"startswith\", \"value\": \"pam_unix(sshd:auth): authentication failure\", \"action\": \"pam_authentication\", \"outcome\": \"failure\"}, {\"field\": \"message_body\", \"op\": \"startswith\", \"value\": \"pam_unix(sshd:session): session opened\", \"action\": \"session_opened\", \"outcome\": \"success\"}, {\"field\": \"message_body\", \"op\": \"startswith\", \"value\": \"pam_unix(sshd:session): session closed\", \"action\": \"session_closed\", \"outcome\": \"success\"}, {\"field\": \"message_body\", \"op\": \"startswith\", \"value\": \"Accepted publickey\", \"action\": \"ssh_authentication\", \"outcome\": \"success\"}, {\"field\": \"message_body\", \"op\": \"startswith\", \"value\": \"Accepted password\", \"action\": \"ssh_authentication\", \"outcome\": \"success\"}, {\"field\": \"message_body\", \"op\": \"startswith\", \"value\": \"Failed password\", \"action\": \"ssh_authentication\", \"outcome\": \"failure\"}], \"processors\": [{\"set\": {\"field\": \"message\", \"copy_from\": \"raw_line\", \"if\": \"ctx.message == null && ctx.raw_line != null\"}}, {\"set\": {\"field\": \"event.original\", \"copy_from\": \"message\", \"if\": \"ctx.event?.original == null\"}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"%{SYSLOGTIMESTAMP:timestamp}\\\\s*%{HOSTNAME:host.hostname} %{DATA:process.name}\\\\[%{POSINT:process.pid}\\\\]: %{GREEDYDATA:message_body}\"]}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"^%{SYSLOGTIMESTAMP:timestamp}\"]}}, {\"date\": {\"field\": \"timestamp\", \"target_field\": \"@timestamp\", \"formats\": [\"MMM d HH:mm:ss\", \"MMM  d HH:mm:ss\"]}}, {\"grok\": {\"field\": \"message_body\", \"patterns\": [\"^pam_unix\\\\(sshd:auth\\\\):\\\\s+authentication\\\\s+failure;\\\\s+logname=\\\\s+uid=%{INT}\\\\s+euid=%{INT}\\\\s+tty=%{NOTSPACE:terminal}\\\\s+ruser=\\\\s+rhost=%{IP:source.ip}\\\\s+user=%{NOTSPACE:user.name}$\", \"^Failed\\\\s+password\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+opened\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.name}\\\\(uid=\\\\d+\\\\)\\\\s+by\\\\s+\\\\(uid=%{NOTSPACE}$\", \"^Accepted\\\\s+password\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}$\", \"^Accepted\\\\s+publickey\\\\s+for\\\\s+%{NOTSPACE:user.name}\\\\s+from\\\\s+%{IP:source.ip}\\\\s+port\\\\s+%{INT:source.port}\\\\s+%{NOTSPACE}:\\\\s+%{NOTSPACE}\\\\s+%{NOTSPACE}$\", \"^pam_unix\\\\(sshd:session\\\\):\\\\s+session\\\\s+closed\\\\s+for\\\\s+user\\\\s+%{NOTSPACE:user.name}$\"], \"ignore_failure\": true}}, {\"rename\": {\"field\": \"host.hostname\", \"target_field\": \"host.name\", \"ignore_missing\": true}}, {\"grok\": {\"field\": \"process.name\", \"patterns\": [\"^(?<process.name>[^\\\\[\\\\s]+)\\\\[(?<process.pid>\\\\d+)\\\\]:?$\"], \"ignore_missing\": true, \"ignore_failure\": true}}, {\"convert\": {\"field\": \"process.pid\", \"type\": \"long\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"process.pid\", \"type\": \"long\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"source.port\", \"type\": \"long\", \"ignore_missing\": true}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:auth): authentication failure'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"pam_authentication\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:auth): authentication failure'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session opened'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_opened\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session opened'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session closed'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"session_closed\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session closed'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted publickey'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_authentication\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted publickey'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"success\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted password'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_authentication\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted password'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"failure\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Failed password'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"ssh_authentication\", \"if\": \"ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Failed password'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.outcome == null\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null\"}}, {\"set\": {\"field\": \"log.category\", \"value\": \"authentication\"}}, {\"remove\": {\"field\": [\"event.dataset\", \"host.hostname\", \"ingestion_channel\", \"message_body\", \"received_at\", \"source_name\", \"timestamp\"], \"ignore_missing\": true}}, {\"remove\": {\"field\": \"event\", \"ignore_missing\": true, \"if\": \"ctx.event instanceof Map && ctx.event.isEmpty()\"}}, {\"remove\": {\"field\": \"host\", \"ignore_missing\": true, \"if\": \"ctx.host instanceof Map && ctx.host.isEmpty()\"}}], \"message_groups\": [\"pam_unix(sshd:auth): authentication failure;\", \"Failed password for\", \"pam_unix(sshd:session): session opened\", \"Accepted password for\", \"Accepted publickey for\", \"pam_unix(sshd:session): session closed\"]}}"
+  },
+  "pipeline": {
+    "description": "Schema Agent v4 template for bastion-02-auth-layout1",
+    "processors": [
+      {
+        "set": {
+          "field": "message",
+          "copy_from": "raw_line",
+          "if": "ctx.message == null && ctx.raw_line != null"
+        }
+      },
+      {
+        "set": {
+          "field": "event.original",
+          "copy_from": "message",
+          "if": "ctx.event?.original == null"
+        }
+      },
+      {
+        "grok": {
+          "field": "message",
+          "patterns": [
+            "%{SYSLOGTIMESTAMP:timestamp}\\s*%{HOSTNAME:host.hostname} %{DATA:process.name}\\[%{POSINT:process.pid}\\]: %{GREEDYDATA:message_body}"
+          ]
+        }
+      },
+      {
+        "grok": {
+          "field": "message",
+          "patterns": [
+            "^%{SYSLOGTIMESTAMP:timestamp}"
+          ]
+        }
+      },
+      {
+        "date": {
+          "field": "timestamp",
+          "target_field": "@timestamp",
+          "formats": [
+            "MMM d HH:mm:ss",
+            "MMM  d HH:mm:ss"
+          ]
+        }
+      },
+      {
+        "grok": {
+          "field": "message_body",
+          "patterns": [
+            "^pam_unix\\(sshd:auth\\):\\s+authentication\\s+failure;\\s+logname=\\s+uid=%{INT}\\s+euid=%{INT}\\s+tty=%{NOTSPACE:terminal}\\s+ruser=\\s+rhost=%{IP:source.ip}\\s+user=%{NOTSPACE:user.name}$",
+            "^Failed\\s+password\\s+for\\s+%{NOTSPACE:user.name}\\s+from\\s+%{IP:source.ip}\\s+port\\s+%{INT:source.port}\\s+%{NOTSPACE}$",
+            "^pam_unix\\(sshd:session\\):\\s+session\\s+opened\\s+for\\s+user\\s+%{NOTSPACE:user.name}\\(uid=\\d+\\)\\s+by\\s+\\(uid=%{NOTSPACE}$",
+            "^Accepted\\s+password\\s+for\\s+%{NOTSPACE:user.name}\\s+from\\s+%{IP:source.ip}\\s+port\\s+%{INT:source.port}\\s+%{NOTSPACE}$",
+            "^Accepted\\s+publickey\\s+for\\s+%{NOTSPACE:user.name}\\s+from\\s+%{IP:source.ip}\\s+port\\s+%{INT:source.port}\\s+%{NOTSPACE}:\\s+%{NOTSPACE}\\s+%{NOTSPACE}$",
+            "^pam_unix\\(sshd:session\\):\\s+session\\s+closed\\s+for\\s+user\\s+%{NOTSPACE:user.name}$"
+          ],
+          "ignore_failure": true
+        }
+      },
+      {
+        "rename": {
+          "field": "host.hostname",
+          "target_field": "host.name",
+          "ignore_missing": true
+        }
+      },
+      {
+        "grok": {
+          "field": "process.name",
+          "patterns": [
+            "^(?<process.name>[^\\[\\s]+)\\[(?<process.pid>\\d+)\\]:?$"
+          ],
+          "ignore_missing": true,
+          "ignore_failure": true
+        }
+      },
+      {
+        "convert": {
+          "field": "process.pid",
+          "type": "long",
+          "ignore_missing": true
+        }
+      },
+      {
+        "convert": {
+          "field": "process.pid",
+          "type": "long",
+          "ignore_missing": true
+        }
+      },
+      {
+        "convert": {
+          "field": "source.port",
+          "type": "long",
+          "ignore_missing": true
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "failure",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:auth): authentication failure'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "pam_authentication",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:auth): authentication failure'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "success",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session opened'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "session_opened",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session opened'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "success",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session closed'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "session_closed",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('pam_unix(sshd:session): session closed'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "success",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted publickey'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "ssh_authentication",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted publickey'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "success",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted password'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "ssh_authentication",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Accepted password'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "failure",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Failed password'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "ssh_authentication",
+          "if": "ctx.event?.action == null && (ctx.message_body != null && ctx.message_body.toString().startsWith('Failed password'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.outcome == null"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "other",
+          "if": "ctx.event?.action == null"
+        }
+      },
+      {
+        "set": {
+          "field": "log.category",
+          "value": "authentication"
+        }
+      },
+      {
+        "remove": {
+          "field": [
+            "event.dataset",
+            "host.hostname",
+            "ingestion_channel",
+            "message_body",
+            "received_at",
+            "source_name",
+            "timestamp"
+          ],
+          "ignore_missing": true
+        }
+      },
+      {
+        "remove": {
+          "field": "event",
+          "ignore_missing": true,
+          "if": "ctx.event instanceof Map && ctx.event.isEmpty()"
+        }
+      },
+      {
+        "remove": {
+          "field": "host",
+          "ignore_missing": true,
+          "if": "ctx.host instanceof Map && ctx.host.isEmpty()"
+        }
+      }
+    ],
+    "_meta": {
+      "created_by": "schema_agent_v4",
+      "model": "qwen3:14b"
+    }
+  },
+  "pipeline_sha256": "57dc7ced3d77011926859e4344fb33ae7deb5e5fbecad83c6ec9547876b52317",
+  "source": "VERIFIED_RUN snapshot after the reuse step (the feed was reset afterwards); sha matches the manifest"
+}

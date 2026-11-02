@@ -1,0 +1,14 @@
+{
+  "api.enabled": true,
+  "api.http.host": "127.0.0.1",
+  "api.http.port": 9600,
+  "pipeline.workers": 1,
+  "pipeline.batch.size": 50,
+  "pipeline.ecs_compatibility": "disabled",
+  "pipeline.buffer.type": "heap",
+  "xpack.monitoring.enabled": false,
+  "queue.type": "persisted",
+  "queue.max_bytes": "128mb",
+  "path.data": "/usr/share/logstash/data",
+  "path.config": "/usr/share/logstash/pipeline"
+}

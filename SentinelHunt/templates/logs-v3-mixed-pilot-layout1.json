@@ -1,0 +1,202 @@
+{
+  "name": "logs-v3-mixed-pilot-layout1",
+  "registry": {
+    "name": "logs-v3-mixed-pilot-layout1",
+    "feed_name": "v3-mixed-pilot",
+    "layout_shape": "9-9-9a9:9:9.9+9:9 a",
+    "version": "4",
+    "model": "qwen3:14b",
+    "updated": "2026-10-24T08:59:03+00:00",
+    "processors_json": "[{\"set\": {\"field\": \"message\", \"copy_from\": \"raw_line\", \"if\": \"ctx.message == null && ctx.raw_line != null\"}}, {\"set\": {\"field\": \"event.original\", \"copy_from\": \"message\", \"if\": \"ctx.event?.original == null\"}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"%{TIMESTAMP_ISO8601:timestamp} NFLOG PREFIX=%{DATA:event.action} SRC=%{IP:source.ip} DST=%{IP:destination.ip} PROTO=%{WORD:network.transport} SPT=%{INT:source.port} DPT=%{INT:destination.port} LEN=%{INT:network.packet.length}\"]}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"^%{TIMESTAMP_ISO8601:timestamp}\"]}}, {\"date\": {\"field\": \"timestamp\", \"target_field\": \"@timestamp\", \"formats\": [\"yyyy-MM-dd HH:mm:ss,SSS\", \"yyyy-MM-dd HH:mm:ss.SSS\", \"yyyy-MM-dd HH:mm:ss\", \"ISO8601\"]}}, {\"rename\": {\"field\": \"event.action\", \"target_field\": \"rule.name\", \"ignore_missing\": true}}, {\"rename\": {\"field\": \"network.packet.length\", \"target_field\": \"network.bytes\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"destination.port\", \"type\": \"long\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"network.bytes\", \"type\": \"long\", \"ignore_missing\": true}}, {\"lowercase\": {\"field\": \"network.transport\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"source.port\", \"type\": \"long\", \"ignore_missing\": true}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_DROP')\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"network_drop\", \"if\": \"ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_DROP')\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_ALLOW')\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"network_allow\", \"if\": \"ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_ALLOW')\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.network?.transport != null && ctx.network?.transport.toString().startsWith('UDP'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null && (ctx.network?.transport != null && ctx.network?.transport.toString().startsWith('UDP'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.outcome == null\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null\"}}, {\"set\": {\"field\": \"log.category\", \"value\": \"firewall\"}}, {\"remove\": {\"field\": [\"event.dataset\", \"ingestion_channel\", \"network.packet.length\", \"received_at\", \"source_name\", \"timestamp\"], \"ignore_missing\": true}}, {\"remove\": {\"field\": \"network.packet\", \"ignore_missing\": true, \"if\": \"ctx.network?.packet instanceof Map && ctx.network?.packet.isEmpty()\"}}, {\"remove\": {\"field\": \"event\", \"ignore_missing\": true, \"if\": \"ctx.event instanceof Map && ctx.event.isEmpty()\"}}, {\"remove\": {\"field\": \"network\", \"ignore_missing\": true, \"if\": \"ctx.network instanceof Map && ctx.network.isEmpty()\"}}]",
+    "template_json": "{\"name\": \"logs-v3-mixed-pilot-layout1\", \"source\": \"v3-mixed-pilot-layout1\", \"grok_pattern\": \"%{TIMESTAMP_ISO8601:timestamp} NFLOG PREFIX=%{DATA:event.action} SRC=%{IP:source.ip} DST=%{IP:destination.ip} PROTO=%{WORD:network.transport} SPT=%{INT:source.port} DPT=%{INT:destination.port} LEN=%{INT:network.packet.length}\", \"ts_pattern\": \"^%{TIMESTAMP_ISO8601:timestamp}\", \"timestamp_formats\": [\"yyyy-MM-dd HH:mm:ss,SSS\", \"yyyy-MM-dd HH:mm:ss.SSS\", \"yyyy-MM-dd HH:mm:ss\", \"ISO8601\"], \"event_type\": \"network\", \"fields\": [\"timestamp\", \"event.action\", \"source.ip\", \"destination.ip\", \"network.transport\", \"source.port\", \"destination.port\", \"network.packet.length\"], \"parse_rate\": 1.0, \"avg_fields\": 8.0, \"example_lines\": [\"2026-10-23T11:39:24.917165+00:00 NFLOG PREFIX=SE6014_ALLOW SRC=192.0.2.3 DST=192.0.2.3 PROTO=UDP SPT=50232 DPT=18080 LEN=49\", \"2026-10-23T11:39:27.420363+00:00 NFLOG PREFIX=SE6014_DROP SRC=192.0.2.3 DST=192.0.2.3 PROTO=UDP SPT=34510 DPT=18085 LEN=49\", \"2026-10-23T11:39:25.458066+00:00 NFLOG PREFIX=SE6014_ALLOW SRC=192.0.2.3 DST=192.0.2.3 PROTO=UDP SPT=44919 DPT=18080 LEN=49\"], \"model\": \"qwen3:14b\", \"created\": \"2026-10-24T16:58:59\", \"version\": \"4\", \"v4\": {\"header_pattern\": \"%{TIMESTAMP_ISO8601:timestamp} NFLOG PREFIX=%{DATA:event.action} SRC=%{IP:source.ip} DST=%{IP:destination.ip} PROTO=%{WORD:network.transport} SPT=%{INT:source.port} DPT=%{INT:destination.port} LEN=%{INT:network.packet.length}\", \"body_field\": null, \"message_patterns\": [], \"rename\": {\"event.action\": \"rule.name\", \"network.packet.length\": \"network.bytes\"}, \"drop\": [], \"log_category\": \"firewall\", \"rules\": [{\"field\": \"rule.name\", \"op\": \"equals\", \"value\": \"SE6014_DROP\", \"action\": \"network_drop\", \"outcome\": \"unknown\"}, {\"field\": \"rule.name\", \"op\": \"equals\", \"value\": \"SE6014_ALLOW\", \"action\": \"network_allow\", \"outcome\": \"unknown\"}, {\"field\": \"network.transport\", \"op\": \"startswith\", \"value\": \"UDP\", \"action\": \"other\", \"outcome\": \"unknown\"}], \"processors\": [{\"set\": {\"field\": \"message\", \"copy_from\": \"raw_line\", \"if\": \"ctx.message == null && ctx.raw_line != null\"}}, {\"set\": {\"field\": \"event.original\", \"copy_from\": \"message\", \"if\": \"ctx.event?.original == null\"}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"%{TIMESTAMP_ISO8601:timestamp} NFLOG PREFIX=%{DATA:event.action} SRC=%{IP:source.ip} DST=%{IP:destination.ip} PROTO=%{WORD:network.transport} SPT=%{INT:source.port} DPT=%{INT:destination.port} LEN=%{INT:network.packet.length}\"]}}, {\"grok\": {\"field\": \"message\", \"patterns\": [\"^%{TIMESTAMP_ISO8601:timestamp}\"]}}, {\"date\": {\"field\": \"timestamp\", \"target_field\": \"@timestamp\", \"formats\": [\"yyyy-MM-dd HH:mm:ss,SSS\", \"yyyy-MM-dd HH:mm:ss.SSS\", \"yyyy-MM-dd HH:mm:ss\", \"ISO8601\"]}}, {\"rename\": {\"field\": \"event.action\", \"target_field\": \"rule.name\", \"ignore_missing\": true}}, {\"rename\": {\"field\": \"network.packet.length\", \"target_field\": \"network.bytes\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"destination.port\", \"type\": \"long\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"network.bytes\", \"type\": \"long\", \"ignore_missing\": true}}, {\"lowercase\": {\"field\": \"network.transport\", \"ignore_missing\": true}}, {\"convert\": {\"field\": \"source.port\", \"type\": \"long\", \"ignore_missing\": true}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_DROP')\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"network_drop\", \"if\": \"ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_DROP')\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_ALLOW')\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"network_allow\", \"if\": \"ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_ALLOW')\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.action == null && (ctx.network?.transport != null && ctx.network?.transport.toString().startsWith('UDP'))\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null && (ctx.network?.transport != null && ctx.network?.transport.toString().startsWith('UDP'))\"}}, {\"set\": {\"field\": \"event.outcome\", \"value\": \"unknown\", \"if\": \"ctx.event?.outcome == null\"}}, {\"set\": {\"field\": \"event.action\", \"value\": \"other\", \"if\": \"ctx.event?.action == null\"}}, {\"set\": {\"field\": \"log.category\", \"value\": \"firewall\"}}, {\"remove\": {\"field\": [\"event.dataset\", \"ingestion_channel\", \"network.packet.length\", \"received_at\", \"source_name\", \"timestamp\"], \"ignore_missing\": true}}, {\"remove\": {\"field\": \"network.packet\", \"ignore_missing\": true, \"if\": \"ctx.network?.packet instanceof Map && ctx.network?.packet.isEmpty()\"}}, {\"remove\": {\"field\": \"event\", \"ignore_missing\": true, \"if\": \"ctx.event instanceof Map && ctx.event.isEmpty()\"}}, {\"remove\": {\"field\": \"network\", \"ignore_missing\": true, \"if\": \"ctx.network instanceof Map && ctx.network.isEmpty()\"}}]}}"
+  },
+  "pipeline": {
+    "description": "Schema Agent v4 template for v3-mixed-pilot-layout1",
+    "processors": [
+      {
+        "set": {
+          "field": "message",
+          "copy_from": "raw_line",
+          "if": "ctx.message == null && ctx.raw_line != null"
+        }
+      },
+      {
+        "set": {
+          "field": "event.original",
+          "copy_from": "message",
+          "if": "ctx.event?.original == null"
+        }
+      },
+      {
+        "grok": {
+          "field": "message",
+          "patterns": [
+            "%{TIMESTAMP_ISO8601:timestamp} NFLOG PREFIX=%{DATA:event.action} SRC=%{IP:source.ip} DST=%{IP:destination.ip} PROTO=%{WORD:network.transport} SPT=%{INT:source.port} DPT=%{INT:destination.port} LEN=%{INT:network.packet.length}"
+          ]
+        }
+      },
+      {
+        "grok": {
+          "field": "message",
+          "patterns": [
+            "^%{TIMESTAMP_ISO8601:timestamp}"
+          ]
+        }
+      },
+      {
+        "date": {
+          "field": "timestamp",
+          "target_field": "@timestamp",
+          "formats": [
+            "yyyy-MM-dd HH:mm:ss,SSS",
+            "yyyy-MM-dd HH:mm:ss.SSS",
+            "yyyy-MM-dd HH:mm:ss",
+            "ISO8601"
+          ]
+        }
+      },
+      {
+        "rename": {
+          "field": "event.action",
+          "target_field": "rule.name",
+          "ignore_missing": true
+        }
+      },
+      {
+        "rename": {
+          "field": "network.packet.length",
+          "target_field": "network.bytes",
+          "ignore_missing": true
+        }
+      },
+      {
+        "convert": {
+          "field": "destination.port",
+          "type": "long",
+          "ignore_missing": true
+        }
+      },
+      {
+        "convert": {
+          "field": "network.bytes",
+          "type": "long",
+          "ignore_missing": true
+        }
+      },
+      {
+        "lowercase": {
+          "field": "network.transport",
+          "ignore_missing": true
+        }
+      },
+      {
+        "convert": {
+          "field": "source.port",
+          "type": "long",
+          "ignore_missing": true
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_DROP')"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "network_drop",
+          "if": "ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_DROP')"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_ALLOW')"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "network_allow",
+          "if": "ctx.event?.action == null && (ctx.rule?.name != null && ctx.rule?.name.toString() == 'SE6014_ALLOW')"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.action == null && (ctx.network?.transport != null && ctx.network?.transport.toString().startsWith('UDP'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "other",
+          "if": "ctx.event?.action == null && (ctx.network?.transport != null && ctx.network?.transport.toString().startsWith('UDP'))"
+        }
+      },
+      {
+        "set": {
+          "field": "event.outcome",
+          "value": "unknown",
+          "if": "ctx.event?.outcome == null"
+        }
+      },
+      {
+        "set": {
+          "field": "event.action",
+          "value": "other",
+          "if": "ctx.event?.action == null"
+        }
+      },
+      {
+        "set": {
+          "field": "log.category",
+          "value": "firewall"
+        }
+      },
+      {
+        "remove": {
+          "field": [
+            "event.dataset",
+            "ingestion_channel",
+            "network.packet.length",
+            "received_at",
+            "source_name",
+            "timestamp"
+          ],
+          "ignore_missing": true
+        }
+      },
+      {
+        "remove": {
+          "field": "network.packet",
+          "ignore_missing": true,
+          "if": "ctx.network?.packet instanceof Map && ctx.network?.packet.isEmpty()"
+        }
+      },
+      {
+        "remove": {
+          "field": "event",
+          "ignore_missing": true,
+          "if": "ctx.event instanceof Map && ctx.event.isEmpty()"
+        }
+      },
+      {
+        "remove": {
+          "field": "network",
+          "ignore_missing": true,
+          "if": "ctx.network instanceof Map && ctx.network.isEmpty()"
+        }
+      }
+    ],
+    "_meta": {
+      "created_by": "schema_agent_v4",
+      "model": "qwen3:14b"
+    }
+  },
+  "pipeline_sha256": "a90483489b912a1c8ad1ecefeb9312b06d322a4c7f52121dbac1e8ad21f96dc5"
+}

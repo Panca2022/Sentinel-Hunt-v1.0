@@ -1,0 +1,50 @@
+{
+  "feed-v3-mixed-pilot": {
+    "description": "Agent 1 router for feed v3-mixed-pilot",
+    "processors": [
+      {
+        "pipeline": {
+          "name": "logs-v3-mixed-pilot-layout1",
+          "on_failure": [
+            {
+              "pipeline": {
+                "name": "logs-v3-mixed-pilot-layout2",
+                "on_failure": [
+                  {
+                    "pipeline": {
+                      "name": "logs-v3-mixed-pilot-layout3"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "_meta": {
+      "created_by": "schema_agent_v4",
+      "layouts": [
+        "logs-v3-mixed-pilot-layout1",
+        "logs-v3-mixed-pilot-layout2",
+        "logs-v3-mixed-pilot-layout3"
+      ]
+    }
+  },
+  "feed-bastion-02-auth": {
+    "description": "Agent 1 router for feed bastion-02-auth",
+    "processors": [
+      {
+        "pipeline": {
+          "name": "logs-bastion-02-auth-layout1"
+        }
+      }
+    ],
+    "_meta": {
+      "created_by": "schema_agent_v4",
+      "layouts": [
+        "logs-bastion-02-auth-layout1"
+      ]
+    }
+  }
+}

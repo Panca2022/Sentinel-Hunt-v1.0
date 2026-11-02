@@ -1,0 +1,18 @@
+# secrets: the kit keeps credentials and certificates in runtime/ — never commit
+runtime/
+*.env
+*.crt
+*.key
+# local environment
+.venv/
+__pycache__/
+*.pyc
+# run outputs (evidence lives in the results package, not in the repo)
+reports/
+mcp_server/ledger/
+agent1/runs/
+agent1/registry.json
+agent1/registry_retired_*.json
+samples/
+experiments/results/
+versions_and_hashes.json

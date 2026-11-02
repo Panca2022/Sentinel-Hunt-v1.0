@@ -1,0 +1,6 @@
+# exact versions of the recorded, verified run (docs/VERSION_MANIFEST.json -> platform.packages)
+mcp==1.30.0
+anyio==4.15.1
+pydantic==2.14.1
+streamlit==1.40.2
+# optional, only for experiments/side_by_side_image.py (PNG export): playwright

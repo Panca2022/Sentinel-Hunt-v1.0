@@ -1,0 +1,35 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "received_at": {
+        "type": "date"
+      },
+      "record_id": {
+        "type": "keyword"
+      },
+      "capture_id": {
+        "type": "keyword"
+      },
+      "raw_line": {
+        "type": "text"
+      },
+      "source_name": {
+        "type": "keyword"
+      },
+      "ingestion_channel": {
+        "type": "keyword"
+      },
+      "feed_name": {
+        "type": "keyword"
+      }
+    }
+  }
+}

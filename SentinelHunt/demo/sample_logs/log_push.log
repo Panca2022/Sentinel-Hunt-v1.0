@@ -1,0 +1,3 @@
+Oct 24 09:41:07 bastion-02 sshd[7420]: Accepted publickey for user_003 from 192.0.2.20 port 50388 ssh2: ED25519 SHA256:q7Lk2v
+Oct 24 09:41:07 bastion-02 sshd[7420]: pam_unix(sshd:session): session opened for user user_003(uid=1003) by (uid=0)
+Oct 24 09:44:52 bastion-02 sshd[7420]: pam_unix(sshd:session): session closed for user user_003
